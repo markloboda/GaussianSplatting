@@ -191,12 +191,12 @@ void Renderer::Render(const Camera &camera) {
    startSort = std::chrono::high_resolution_clock::now();
    UpdateUniforms(camera);
 
-   WGPUCommandEncoder encoder = *CreateCommandEncoder();
+   WGPUCommandEncoder encoder = CreateCommandEncoder();
 
    int workGroups = (_splatsData.size() + _workGroupSize - 1) / _workGroupSize;
 
    // Transform compute pass.
-   WGPUComputePassEncoder computePassEncoder = *BeginComputePass(encoder);
+   WGPUComputePassEncoder computePassEncoder = BeginComputePass(encoder);
    wgpuComputePassEncoderSetPipeline(computePassEncoder, _wgpuTransformComputePipeline);
    wgpuComputePassEncoderSetBindGroup(computePassEncoder, 0, _sceneBindGroup, 0, nullptr);
    wgpuComputePassEncoderSetBindGroup(computePassEncoder, 1, _stateBindGroup, 0, nullptr);
@@ -210,7 +210,7 @@ void Renderer::Render(const Camera &camera) {
       uint32_t offset = i * sizeof(uvec2);
 
       wgpuCommandEncoderCopyBufferToBuffer(encoder, _sortSplatsParamsDataBuffer, offset, _sortSplatsParamsUniform, 0, sizeof(uvec2));
-      computePassEncoder = *BeginComputePass(encoder);
+      computePassEncoder = BeginComputePass(encoder);
       wgpuComputePassEncoderSetPipeline(computePassEncoder, _wgpuSortComputePipeline);
       wgpuComputePassEncoderSetBindGroup(computePassEncoder, 0, _sceneBindGroup, 0, nullptr);
       wgpuComputePassEncoderSetBindGroup(computePassEncoder, 1, _stateBindGroup, 0, nullptr);
@@ -222,9 +222,9 @@ void Renderer::Render(const Camera &camera) {
 
    startRender = std::chrono::high_resolution_clock::now();
    // Render pass.
-   WGPUSurfaceTexture surfaceTexture = *GetNextSurfaceTexture();
-   WGPUTextureView textureView = *CreateTextureView(surfaceTexture.texture);
-   WGPURenderPassEncoder renderPassEncoder = *BeginRenderPass(encoder, textureView);
+   WGPUSurfaceTexture surfaceTexture = GetNextSurfaceTexture();
+   WGPUTextureView textureView = CreateTextureView(surfaceTexture.texture);
+   WGPURenderPassEncoder renderPassEncoder = BeginRenderPass(encoder, textureView);
 
    wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 0, _sceneBindGroup, 0, nullptr);
    wgpuRenderPassEncoderSetBindGroup(renderPassEncoder, 1, _stateBindGroup, 0, nullptr);
@@ -239,7 +239,7 @@ void Renderer::Render(const Camera &camera) {
    wgpuRenderPassEncoderEnd(renderPassEncoder);
    wgpuRenderPassEncoderRelease(renderPassEncoder);
    // Submit command buffer and release resources.
-   WGPUCommandBuffer commandBuffer = *FinishAndReleaseCommandEncoder(encoder);
+   WGPUCommandBuffer commandBuffer = FinishAndReleaseCommandEncoder(encoder);
    wgpuQueueSubmit(_wgpuQueue, 1, &commandBuffer); // Submit command buffer.
    wgpuCommandBufferRelease(commandBuffer);
    wgpuTextureViewRelease(textureView);
@@ -741,7 +741,7 @@ void Renderer::UpdateUniforms(const Camera& camera) const
    wgpuQueueWriteBuffer(_wgpuQueue, _uniformBuffer, 0, &uniforms, sizeof(ShaderUniforms));
 }
 
-WGPUCommandEncoder* Renderer::CreateCommandEncoder() const
+WGPUCommandEncoder Renderer::CreateCommandEncoder() const
 {
    WGPUCommandEncoderDescriptor encoderDesc = {};
    encoderDesc.nextInChain = nullptr;
@@ -752,10 +752,10 @@ WGPUCommandEncoder* Renderer::CreateCommandEncoder() const
       return nullptr;
    }
 
-   return &encoder;
+   return encoder;
 }
 
-WGPUComputePassEncoder* Renderer::BeginComputePass(WGPUCommandEncoder encoder) const
+WGPUComputePassEncoder Renderer::BeginComputePass(WGPUCommandEncoder encoder) const
 {
    WGPUComputePassDescriptor computePassDesc = {};
    computePassDesc.nextInChain = nullptr;
@@ -766,22 +766,21 @@ WGPUComputePassEncoder* Renderer::BeginComputePass(WGPUCommandEncoder encoder) c
       wgpuCommandEncoderRelease(encoder);
       return nullptr;
    }
-   return &computePassEncoder;
+   return computePassEncoder;
 }
 
-WGPUSurfaceTexture* Renderer::GetNextSurfaceTexture() const
+WGPUSurfaceTexture Renderer::GetNextSurfaceTexture() const
 {
    WGPUSurfaceTexture surfaceTexture;
    wgpuSurfaceGetCurrentTexture(_wgpuSurface, &surfaceTexture);
    if (surfaceTexture.status != WGPUSurfaceGetCurrentTextureStatus_Success) {
       __debugbreak();
-      return nullptr;
    }
 
-   return &surfaceTexture;
+   return surfaceTexture;
 }
 
-WGPUTextureView* Renderer::CreateTextureView(WGPUTexture texture) const
+WGPUTextureView Renderer::CreateTextureView(WGPUTexture texture) const
 {
    WGPUTextureViewDescriptor viewDesc;
    viewDesc.nextInChain = nullptr;
@@ -799,10 +798,10 @@ WGPUTextureView* Renderer::CreateTextureView(WGPUTexture texture) const
       return nullptr;
    }
 
-   return &textureView;
+   return textureView;
 }
 
-WGPURenderPassEncoder* Renderer::BeginRenderPass(WGPUCommandEncoder encoder, WGPUTextureView textureView) const
+WGPURenderPassEncoder Renderer::BeginRenderPass(WGPUCommandEncoder encoder, WGPUTextureView textureView) const
 {
    WGPURenderPassDescriptor renderPassDesc = {};
    renderPassDesc.nextInChain = nullptr;
@@ -828,10 +827,10 @@ WGPURenderPassEncoder* Renderer::BeginRenderPass(WGPUCommandEncoder encoder, WGP
       return nullptr;
    }
 
-   return &renderPassEncoder;
+   return renderPassEncoder;
 }
 
-WGPUCommandBuffer* Renderer::FinishAndReleaseCommandEncoder(WGPUCommandEncoder encoder) const
+WGPUCommandBuffer Renderer::FinishAndReleaseCommandEncoder(WGPUCommandEncoder encoder) const
 {
    WGPUCommandBufferDescriptor cmdBufferDesc = {};
    cmdBufferDesc.nextInChain = nullptr;
@@ -844,5 +843,5 @@ WGPUCommandBuffer* Renderer::FinishAndReleaseCommandEncoder(WGPUCommandEncoder e
       return nullptr;
    }
 
-   return &commandBuffer;
+   return commandBuffer;
 }

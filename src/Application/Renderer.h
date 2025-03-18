@@ -101,16 +101,16 @@ private:
 
    // Rendering functions.
    void UpdateUniforms(const Camera& camera) const;
-   WGPUCommandEncoder* CreateCommandEncoder() const;
+   WGPUCommandEncoder CreateCommandEncoder() const;
 
    // Compute pass functions.
-   WGPUComputePassEncoder* BeginComputePass(WGPUCommandEncoder encoder) const;
+   WGPUComputePassEncoder BeginComputePass(WGPUCommandEncoder encoder) const;
 
    // Render pass functions.
-   WGPUSurfaceTexture* GetNextSurfaceTexture() const;
-   WGPUTextureView* CreateTextureView(WGPUTexture texture) const;
-   WGPURenderPassEncoder* BeginRenderPass(WGPUCommandEncoder encoder, WGPUTextureView textureView) const;
+   WGPUSurfaceTexture GetNextSurfaceTexture() const;
+   WGPUTextureView CreateTextureView(WGPUTexture texture) const;
+   WGPURenderPassEncoder BeginRenderPass(WGPUCommandEncoder encoder, WGPUTextureView textureView) const;
 
    // Release functions.
-   WGPUCommandBuffer* FinishAndReleaseCommandEncoder(WGPUCommandEncoder encoder) const;
+   WGPUCommandBuffer FinishAndReleaseCommandEncoder(WGPUCommandEncoder encoder) const;
 };

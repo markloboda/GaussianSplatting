@@ -44,6 +44,9 @@ set(SHADER_FILES
 # Group shader files
 source_group(TREE ${REPO_ROOT} FILES ${SHADER_FILES})
 
+# Enable optimizations for Release build
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /DNDEBUG") 
+
 # Include library directories
 add_subdirectory(${DEPENDENCIES_ROOT}/glfw)
 add_subdirectory(${DEPENDENCIES_ROOT}/glfw3webgpu)

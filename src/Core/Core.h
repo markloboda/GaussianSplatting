@@ -12,3 +12,6 @@ using namespace glm;
 
 #define PI 3.14159265359f
 
+#ifdef __debugbreak
+#define __debugbreak()
+#endif
